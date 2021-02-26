@@ -40,9 +40,11 @@ TELNET test
 -------------
 
 You can try your VPN with ``telnet`` to see if you can connect from the client to 10.10.10.2. Telnet is not encrypted. However, encapsulating it in a QUIC payload encrypts it.
+Let's launch Wireshark to listen on ``mytunnel`` to see the telnet decapsulated traffic. 
 
 .. image:: https://raw.githubusercontent.com/sohaib-ouzineb/main/master/TELNET_test.png?sanitize=true
 
-We can verify that the traffic that is interceptable between the client and the host is indeed protected. To this end, we launch Wireshark to listen to on the real interface eth0. We see the following:
+We can verify that the traffic that is interceptable between the client and the host is indeed protected. To this end, we launch Wireshark to listen to on the real interface eth0 and we see that the traffic is indeed QUIC-encapsulated and thus protected.
 
 .. image:: https://raw.githubusercontent.com/sohaib-ouzineb/main/master/QUIC_encapsulated_traffic.png?sanitize=true
+
