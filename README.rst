@@ -4,7 +4,7 @@ Requirements
 ------------
 
 ``aioquic`` requires Python 3.6 or better, and the OpenSSL development headers.
-You also need to generate a private key and a certificate for the vpn server and mention their respective paths in the launch command below.
+You also need to generate a pem private key and a x509 certificate for the vpn server and mention their respective paths in the launch command below.
 
 Testing in a LAN environment
 ------------
