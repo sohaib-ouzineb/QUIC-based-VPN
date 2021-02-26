@@ -19,7 +19,7 @@ On the client side:
 
 .. code-block:: console
 
-   $ sudo python3 vpn_client.py --host IP --port 443 -k
+   $ sudo python3 vpn_client.py --host SERVER_LAN_IP --port 443
    
 You are then presented with a login/password prompt (root/toor) that you need to complete to authenticate to the server.
 
