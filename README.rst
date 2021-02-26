@@ -19,7 +19,7 @@ On the client side:
 
 .. code-block:: console
 
-   $ sudo python3 vpn_client.py --host SERVER_LAN_IP --port 443
+   $ sudo python3 vpn_client.py --host SERVER_LAN_IP --port 443 -k
    
 You are then presented with a login/password prompt (root/toor) that you need to complete to authenticate to the server.
 
@@ -35,3 +35,10 @@ You can then test some programs like ``ping``, ``telnet``, ``ssh`` or even ``htt
 
 You can also verify the QUIC encapsulation process by launching Wireshark on ``eth0``. You should see QUIC traffic on this interface. 
 However, when looking on ``mytunnel``, you should see decapsulated/normal traffic between 10.10.10.1 and 10.10.10.2.
+
+TELNET test
+-------------
+
+You can try your VPN with ``telnet`` to see if you can connect from the client to 10.10.10.2. Telnet is not encrypted. However, encapsulating it in a QUIC payload encrypts it.
+
+.. image:: https://raw.githubusercontent.com/sohaib-ouzineb/main/master/TELNET_test.png?sanitize=true
