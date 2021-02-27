@@ -1,4 +1,4 @@
-#based on the aioquic library that can be found at https ://github.com/aiortc/aioquic
+# based on the aioquic library that can be found at https ://github.com/aiortc/aioquic
 import argparse
 import asyncio
 import json
@@ -24,37 +24,38 @@ import threading
 import sys
 import pytun
 from pytun import TunTapDevice
-COUNT=0
+
+COUNT = 0
 
 logger = logging.getLogger("client")
 
-#initialize virtual interface tun
-tun=TunTapDevice(name='mytunnel',flags=pytun.IFF_TUN|pytun.IFF_NO_PI)
-tun.addr='10.10.10.1'
-tun.dstaddr='10.10.10.2'
-tun.netmask='255.255.255.0'
-tun.mtu=1048
+# initialize virtual interface tun
+tun = TunTapDevice(name="mytunnel", flags=pytun.IFF_TUN | pytun.IFF_NO_PI)
+tun.addr = "10.10.10.1"
+tun.dstaddr = "10.10.10.2"
+tun.netmask = "255.255.255.0"
+tun.mtu = 1048
 tun.persist(True)
 tun.up()
-STREAM_ID=100
+STREAM_ID = 100
+
+
 class VPNClient(QuicConnectionProtocol):
-    
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self._ack_waiter: Optional[asyncio.Future[None]] = None
 
     async def query(self) -> None:
-	#client authentication using login/password, clear text because already encrypted by QUIC   	
+        # client authentication using login/password, clear text because already encrypted by QUIC
         global STREAM_ID
-        login=input("login: ")
-        password=input("password: ")
-        conc=login+":"+password
-        conc=conc.encode('utf-8')
-        auth=base64.b64encode(conc)
-        query=auth
-        #query = DNSRecord(q=DNSQuestion(dns_query, getattr(QTYPE, query_type)))
+        login = input("login: ")
+        password = input("password: ")
+        conc = login + ":" + password
+        conc = conc.encode("utf-8")
+        auth = base64.b64encode(conc)
+        query = auth
         stream_id = self._quic.get_next_available_stream_id()
-        STREAM_id=stream_id
+        STREAM_id = stream_id
         end_stream = False
         self._quic.send_stream_data(stream_id, bytes(query), end_stream)
         waiter = self._loop.create_future()
@@ -64,11 +65,10 @@ class VPNClient(QuicConnectionProtocol):
         return await asyncio.shield(waiter)
 
     def tun_read(self) -> None:
-        global tun,STREAM_ID
+        global tun, STREAM_ID
         while True:
+            # QUIC encapsulation 
             packet = tun.read(tun.mtu)
-            #stream_id = self._quic.get_next_available_stream_id()
-            #logger.debug(f"Stream ID: {stream_id}")
             end_stream = False
             self._quic.send_stream_data(STREAM_ID, bytes(packet), end_stream)
             waiter = self._loop.create_future()
@@ -76,25 +76,23 @@ class VPNClient(QuicConnectionProtocol):
             self.transmit()
 
     def quic_event_received(self, event: QuicEvent) -> None:
-        global COUNT,tun
+        global COUNT, tun
         if self._ack_waiter is not None:
             if isinstance(event, StreamDataReceived):
-                #answer = DNSRecord.parse(event.data)
-                if(COUNT==0):
-                        #authentication succeeded or failed 
-                        COUNT=1
-                        answer = event.data.decode("utf-8","ignore")      
-                        waiter = self._loop.create_future()
-                        self._ack_waiter = waiter
-                        t=threading.Thread(target=self.tun_read)
-                        t.start()
+                if COUNT == 0:
+                    # authentication succeeded or failed
+                    COUNT = 1
+                    answer = event.data.decode("utf-8", "ignore")
+                    waiter = self._loop.create_future()
+                    self._ack_waiter = waiter
+                    t = threading.Thread(target=self.tun_read)
+                    t.start()
                 else:
-                        #decapsulate QUIC and write to internal tun
-                        answer=event.data
-                        tun.write(answer)
-                        waiter = self._loop.create_future()
-                        self._ack_waiter = waiter
-                        
+                    # decapsulate QUIC and write to internal tun
+                    answer = event.data
+                    tun.write(answer)
+                    waiter = self._loop.create_future()
+                    self._ack_waiter = waiter
 
 
 def save_session_ticket(ticket):
@@ -112,8 +110,8 @@ async def run(
     configuration: QuicConfiguration,
     host: str,
     port: int,
-    #query_type: str,
-    #dns_query: str,
+    # query_type: str,
+    # dns_query: str,
 ) -> None:
     logger.debug(f"Connecting to {host}:{port}")
     async with connect(
@@ -143,8 +141,6 @@ if __name__ == "__main__":
         action="store_true",
         help="do not validate server certificate",
     )
-    #parser.add_argument("--dns_type", help="The DNS query type to send")
-    #parser.add_argument("--query", help="Domain to query")
     parser.add_argument(
         "-q", "--quic-log", type=str, help="log QUIC events to a file in QLOG format"
     )
@@ -197,8 +193,8 @@ if __name__ == "__main__":
                 configuration=configuration,
                 host=args.host,
                 port=args.port,
-                #query_type=args.dns_type,
-                #dns_query=args.query,
+                # query_type=args.dns_type,
+                # dns_query=args.query,
             )
         )
     finally:
